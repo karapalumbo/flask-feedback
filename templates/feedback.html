@@ -1,15 +1,14 @@
-{% extends 'base.html' %} {% block title %}Login{% endblock %} {% block content
-%}
+{% extends 'base.html' %} {% block title %}Add Feedack{% endblock %} {% block
+content %}
 
-<h1 class="display-5">Login Below</h1>
+<h1 class="display-5">Add Feedback Below</h1>
 
 <form method="POST">
   {{ form.hidden_tag() }} {% for field in form if field.widget.input_type
   !='hidden' %}
-
   <p>{{ field.label }} {{ field(class_="form-control") }}</p>
   {% endfor %}
 
-  <button class="btn btn-success">Login</button>
+  <button class="btn btn-success" type="submit">Submit</button>
 </form>
 {% endblock %}
