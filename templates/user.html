@@ -14,7 +14,12 @@
   </thead>
   <tbody>
     <tr>
-      <td>{{user.username}}</td>
+      <td>
+        {{user.username}}
+        <form method="POST" action="/users/{{user.username}}/delete">
+          <button class="fas fa-trash-alt"></button>
+        </form>
+      </td>
       <td>{{user.email}}</td>
       <td>{{user.first_name}}</td>
       <td>{{user.last_name}}</td>
@@ -26,4 +31,9 @@
     </tr>
   </tbody>
 </table>
+<div>
+  <form action="/users/{{user.username}}/feedback/add">
+    <button class="btn btn-info" type="submit">Add Feedback</button>
+  </form>
+</div>
 {% endblock %}

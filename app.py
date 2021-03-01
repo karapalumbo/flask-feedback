@@ -47,6 +47,17 @@ def register():
         return render_template('register.html', form=form)
 
 
+@app.route('/users/<username>', methods=['GET', 'POST'])
+def show_user(username):
+    if "username" not in session:
+        flash("You must be logged in.", "danger")
+        return redirect('/')
+    else:
+        user = User.query.get_or_404(username)
+        feedback = Feedback.query.all()
+        return render_template('user.html', user=user, feedback=feedback)
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -64,32 +75,22 @@ def login():
             return redirect(f'/users/{user.username}')
         else:
             form.username.errors = ['Invalid username and/or password.']
-            return render_template('login.html', form=form)
+            return render_template('register.html', form=form)
 
     return render_template('login.html', form=form)
-
-
-
-@app.route('/users/<username>', methods=['GET', 'POST'])
-def show_user(username):
-    if "username" not in session:
-        flash("You must be logged in.", "danger")
-        return redirect('/')
-    else:
-        user = User.query.get(username)
-        feedback = Feedback.query.all()
-        return render_template('user.html', user=user, feedback=feedback)
     
 
 @app.route('/users/<username>/delete', methods=["POST"])
-def delete_user():
+def delete_user(username):
 
     if "username" not in session:
         flash("You do not have permission to delete a user.", "danger")
         return redirect('/')
 
     else:
-        db.session.delete(user)
+        user = User.query.get_or_404(username)
+        feedback = Feedback.query.filter(username)
+        db.session.delete(user, feedback)
         db.session.commit()
         session.pop("username")
 
@@ -118,7 +119,7 @@ def add_feedback(username):
         db.session.add(feedback)
         db.session.commit() 
 
-        return redirect(f"/users/{username}")
+        return redirect(f"/users/{feedback.username}")
 
     else:
         return render_template('feedback.html', form=form)
@@ -127,11 +128,12 @@ def add_feedback(username):
 @app.route("/feedback/<int:feedback_id>/update", methods=['GET', 'POST'])
 def update_feedback(feedback_id):
 
+    feedback = Feedback.query.get(feedback_id)
+
     if "username" not in session:
         flash("Please login or register to update feedback.", "danger")
         return redirect('/')
-
-    feedback = Feedback.query.get(feedback_id)
+    
     form = FeedbackForm(obj=feedback)
 
     if form.validate_on_submit():
@@ -150,7 +152,7 @@ def delete_feedback(feedback_id):
 
     feedback = Feedback.query.get_or_404(feedback_id)
 
-    if "username" not in session:
+    if "username" not in session or feedback.username != session['username']:
         flash("Please login or register to delete feedback.", "danger")
         return redirect('/')
 
