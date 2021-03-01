@@ -3,6 +3,7 @@ from flask import Flask, render_template, redirect, session, flash
 from models import connect_db, db, User, Feedback
 from forms import UserForm, FeedbackForm
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import text
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgres:///feedback"
@@ -76,7 +77,7 @@ def show_user(username):
         return redirect('/')
     else:
         user = User.query.get(username)
-        feedback = Feedback.query.filter(username)
+        feedback = Feedback.query.all()
         return render_template('user.html', user=user, feedback=feedback)
     
 
@@ -88,7 +89,6 @@ def delete_user():
         return redirect('/')
 
     else:
-        user = User.query.get(username)
         db.session.delete(user)
         db.session.commit()
         session.pop("username")
@@ -121,7 +121,7 @@ def add_feedback(username):
         return redirect(f"/users/{username}")
 
     else:
-        return render_template('feedback.html', form=form, feedback=feedback)
+        return render_template('feedback.html', form=form)
 
 
 @app.route("/feedback/<int:feedback_id>/update", methods=['GET', 'POST'])
@@ -131,6 +131,7 @@ def update_feedback(feedback_id):
         flash("Please login or register to update feedback.", "danger")
         return redirect('/')
 
+    feedback = Feedback.query.get(feedback_id)
     form = FeedbackForm(obj=feedback)
 
     if form.validate_on_submit():
@@ -144,13 +145,13 @@ def update_feedback(feedback_id):
     return render_template("edit.html", form=form, feedback=feedback)
 
 
-@app.route('/feedback/<int:feedback_id>/delete', methods=['DELETE'])
+@app.route('/feedback/<int:feedback_id>/delete', methods=['POST'])
 def delete_feedback(feedback_id):
 
     feedback = Feedback.query.get_or_404(feedback_id)
 
     if "username" not in session:
-        flash("Please login or register to update feedback.", "danger")
+        flash("Please login or register to delete feedback.", "danger")
         return redirect('/')
 
     db.session.delete(feedback)

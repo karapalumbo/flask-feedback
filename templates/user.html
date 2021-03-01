@@ -19,7 +19,9 @@
       <td>{{user.first_name}}</td>
       <td>{{user.last_name}}</td>
       <td>
-        <a href=/feedback/{{feedback.id}}/update>{{feedback}}</a>
+        {% for f in feedback %}
+        <div><a href="/feedback/{{f.id}}/update">{{f.title}}</a></div>
+        {% endfor %}
       </td>
     </tr>
   </tbody>
