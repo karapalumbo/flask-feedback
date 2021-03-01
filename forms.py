@@ -16,3 +16,5 @@ class FeedbackForm(FlaskForm):
     content = TextAreaField("Content", validators=[InputRequired("Please add your feedback")])
 
 
+class DeleteForm(FlaskForm):
+    """intentionally left blank"""

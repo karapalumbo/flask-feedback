@@ -14,6 +14,8 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 
 connect_db(app)
+db.drop_all()
+db.create_all()
 
 # toolbar = DebugToolbarExtension(app)
 
@@ -83,14 +85,13 @@ def login():
 @app.route('/users/<username>/delete', methods=["POST"])
 def delete_user(username):
 
-    if "username" not in session:
-        flash("You do not have permission to delete a user.", "danger")
+    if "username" not in session or username != session['username']:
+        flash("You do not have permission to delete another user.", "danger")
         return redirect('/')
 
     else:
         user = User.query.get_or_404(username)
-        feedback = Feedback.query.filter(username)
-        db.session.delete(user, feedback)
+        db.session.delete(user)
         db.session.commit()
         session.pop("username")
 
